@@ -21,8 +21,8 @@
 
 ## Screenshots
 
-![Image 1](Screenshot (123).png)
-![Image 2](Screenshot (123).png)
+![Image 1](https://raw.githubusercontent.com/veselink1/MultiClip/master/Screenshots/Screenshot%20(123).png)
+![Image 2](https://raw.githubusercontent.com/veselink1/MultiClip/master/Screenshots/Screenshot%20(124).png)
 
 ## Information
 The core application is written in C# and uses the WPF framework. All the controls are customized to reflect the UWP (Acrylic) design Microsft is promoting with Windows 10. The application makes use of low-level Windows APIs, unsafe C# code, WeakReferences and in-memory compression through UnmanagedMemoryStream to increase throughput and performance, reduce memory requirements and minimize stress on the .NET GC. The collection of data from the clipboard is simultaneous and uninterrupting. Restoring a previous clipboard state is also efficient. 
