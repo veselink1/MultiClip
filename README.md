@@ -2,18 +2,31 @@
 ### Contributers - veselink1, lubomarinski
 ## Features
 • Store multiple items in the clipboard and access the from anywhere
+
 • Share clipboard items across network devices
+
 • In-memory clipboard item compression for large items
+
 • Supports a large variety of formats, including (plain text, rich text, images, file drops and more)
+
 • Uses a simple and fast interface
+
 • Does *not* steal focus when the window is opened and allows for uninterrupted work experience 
+
 • Entirely customizable (choose a theme, change the accent color, and toggle transparency and blur)
+
 • Both keyboard and touch-optimized, to allow to be used on a variety of devices
+
 • Uses efficient low-level Win32 APIs to optimize for performace and memory
+
 • Optionally use the deskband, which is an Explorer extension that blends into the taskbar
+
 • The application is multilingual (currently supports English and Bulgarian)
+
 • Checking for updates and newer versions of the app (WIP)
+
 • User-specified system memory usage limit, to limit the number of items stored in RAM (WIP)
+
 • Explicit exclusion of the current clipboard state from the list
 
 ## Screenshots
