@@ -1,8 +1,5 @@
-# MultiClip - copy and paste unleashed
+# MultiClip - unlock the full potential of the clipboard
 ### Contributers - veselink1, lubomarinski
-
-## MultiClip allows users to unlock the full potential of the Clipboard. 
-
 ## Features
 • Store multiple items in the clipboard and access the from anywhere
 • Share clipboard items across network devices
