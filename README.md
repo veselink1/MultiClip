@@ -1,4 +1,4 @@
-# MultiClip - Copy&Paste V2
+# MultiClip - copy and paste unleashed
 ### Contributers - veselink1, lubomarinski
 
 ## MultiClip allows users to unlock the full potential of the Clipboard. 
