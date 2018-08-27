@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="MultiClip.Controls.FileDropItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MultiClip.Controls"
+             xmlns:u="clr-namespace:UComponents;assembly=UComponents"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="300"
+             IsHitTestVisible="True"
+             Background="Transparent">
+    <Border
+        Height="50"
+        TextBlock.Foreground="{DynamicResource UColorBaseHigh}"
+        TextBlock.FontSize="{DynamicResource UFontSizeMedium}">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource UColorBaseHighlight}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid Margin="5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="32" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Image Grid.Column="0" x:Name="ThumbnailImage" />
+            <TextBlock Grid.Column="1" x:Name="ContentText" Margin="5" VerticalAlignment="Center" TextWrapping="NoWrap" />
+            <Border Grid.Column="2">
+                <u:Button x:Name="ViewButton" VerticalAlignment="Stretch" Padding="8 8 8 6" Background="Transparent" HorizontalContentAlignment="Center">
+                    <TextBlock
+                        Text="&#xED41;"
+                        FontSize="{DynamicResource UFontSizeLarge}"
+                        FontFamily="/UComponents;component/Fonts/#Segoe MDL2 Assets"
+                        HorizontalAlignment="Center"
+                        TextAlignment="Center"
+                    />
+                </u:Button>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

@@ -1,0 +1,435 @@
+﻿using System;
+using System.Windows;
+using System.Windows.Media;
+using System.ComponentModel;
+using System.Security.Permissions;
+using Keys = System.Windows.Forms.Keys;
+using NotifyIcon = System.Windows.Forms.NotifyIcon;
+using MultiClip.Network;
+using MultiClip.Utilities;
+using System.Threading.Tasks;
+using System.IO;
+using System.Linq;
+using WindowsInput;
+using WindowsInput.Native;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
+
+namespace MultiClip
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        private NotifyIcon _notifyIcon;
+
+        private bool _isVisible;
+        private readonly GlobalHotkey _toggleVisibilityHotkey;
+
+        private readonly TimeSpan _copyPasteOpTimeout;
+
+        private readonly LowLevelKeyboardHook _keyboardHook;
+        private bool _isCtrlHeld = false;
+
+        private bool _isHandlingQuickCopy = false;
+        private bool _shouldDiscardNextQuickCopy = false;
+        private bool _isHandlingQuickPaste = false;
+        private bool _shouldDiscardNextQuickPaste = false;
+        private QuickInputWindow _quickInputWindow;
+
+        private Action<int> _handleQuickActionIndexInput = null;
+        private Keys _oneTimeHandleKeyUp = Keys.None;
+        private int _handleCtrlKeyUpCountdown = 0;
+        private int _discardCtrlKeyDownCountdown = 0;
+
+        private readonly UIPermission _clipboardPermission;
+
+        private ClipboardState _systemClipboardPendingState = null;
+        private readonly ClipboardState[] _clipboardStates;
+
+        private readonly DwmColorizationHelper _dwmColorizationHelper;
+
+        private readonly Server _networkListener;
+        private readonly NetworkAwarenessManager _awarenessManager;
+
+        public static readonly DependencyProperty InitialLeftOffsetProperty = DependencyProperty.Register(
+            nameof(StartLeftOffset), 
+            typeof(double), 
+            typeof(MainWindow), 
+            new UIPropertyMetadata(0.0));
+
+        public double StartLeftOffset
+        {
+            get { return (double)this.GetValue(InitialLeftOffsetProperty); }
+            set { this.SetValue(InitialLeftOffsetProperty, value); }
+        }
+
+        public static readonly DependencyProperty EndLeftOffsetProperty = DependencyProperty.Register(
+            nameof(EndLeftOffset), 
+            typeof(double), 
+            typeof(MainWindow), 
+            new UIPropertyMetadata(0.0));
+
+        public double EndLeftOffset
+        {
+            get { return (double)this.GetValue(EndLeftOffsetProperty); }
+            set { this.SetValue(EndLeftOffsetProperty, value); }
+        }
+
+        public static readonly DependencyProperty VisibilityChangeDurationProperty = DependencyProperty.Register(
+            nameof(VisibilityChangeDuration), 
+            typeof(Duration), 
+            typeof(MainWindow), 
+            new UIPropertyMetadata(new Duration(new TimeSpan(0, 0, seconds: 1))));
+
+        public Duration VisibilityChangeDuration
+        {
+            get { return (Duration)this.GetValue(VisibilityChangeDurationProperty); }
+            set { this.SetValue(VisibilityChangeDurationProperty, value); }
+        }
+
+        public static readonly RoutedEvent VisibilityChangedEvent = EventManager.RegisterRoutedEvent(
+            nameof(VisibilityChanged), RoutingStrategy.Direct, typeof(RoutedEventHandler), typeof(MainWindow));
+
+        public event RoutedEventHandler VisibilityChanged
+        {
+            add { AddHandler(VisibilityChangedEvent, value); }
+            remove { RemoveHandler(VisibilityChangedEvent, value); }
+        }
+
+        private bool _isTransitioningVisibility;
+
+        public MainWindow()
+        {
+            try
+            {
+                InitializeComponent();
+
+                Top = 0;
+                Left = SystemParameters.WorkArea.Right;
+                Height = SystemParameters.WorkArea.Height;
+                Loaded += OnLoaded;
+
+                _clipboardPermission = new UIPermission(PermissionState.None);
+                _clipboardPermission.Clipboard = UIPermissionClipboard.AllClipboard;
+
+                _clipboardStates = new ClipboardState[10];
+                for (int i = 0; i < _clipboardStates.Length; i++)
+                {
+                    _clipboardStates[i] = new ClipboardState();
+                }
+
+                _isVisible = false;
+                _isTransitioningVisibility = false;
+
+                _toggleVisibilityHotkey = new GlobalHotkey(this, HotkeyModfier.Ctrl | HotkeyModfier.Alt, Keys.W);
+                _toggleVisibilityHotkey.Pressed += Exceptions.CreateHandler(HandleToggleVisibility);
+                _toggleVisibilityHotkey.Register();
+
+                _copyPasteOpTimeout = new TimeSpan(0, 0, 0, 0, milliseconds: 200);
+
+                _keyboardHook = new LowLevelKeyboardHook(this);
+                _keyboardHook.KeyDown += HandleKeyboardHookKeyDown;
+                _keyboardHook.KeyUp += HandleKeyboardHookKeyUp;
+                _keyboardHook.Register();
+
+                _dwmColorizationHelper = new DwmColorizationHelper(this);
+                _dwmColorizationHelper.DwmColorizationColorChanged += HandleDwmColorizationColorChanged;
+                HandleDwmColorizationColorChanged();
+
+                _networkListener = new Server();
+                _awarenessManager = new NetworkAwarenessManager(backgroundSyncEnabled: false);
+
+                _networkListener.Start();
+            }
+            catch (Exception e)
+            {
+                Exceptions.NotifyCritical(e);
+            }
+        }
+
+        private void InitializeNotifyIcon()
+        {
+            _notifyIcon = new NotifyIcon();
+            _notifyIcon.MouseDown += HandleNotifyIconMouseDown;
+
+            Stream iconStream = Application.GetResourceStream(new Uri("pack://application:,,,/Images/TrayIcon.ico")).Stream;
+            _notifyIcon.Icon = new System.Drawing.Icon(iconStream);
+
+            _notifyIcon.Visible = true;
+        }
+
+        private void HandleNotifyIconMouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            ToggleVisibilityAsync().GetAwaiter();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            InitializeNotifyIcon();
+            WindowComposition.EnableBlur(this);
+            ToggleVisibilityAsync();
+        }
+
+        protected override async void OnDeactivated(EventArgs e)
+        {
+            base.OnDeactivated(e);
+            if (_isVisible || _isTransitioningVisibility)
+            {
+                await FlyOutAsync();
+            }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            _notifyIcon.Visible = false;
+            _notifyIcon.Dispose();
+            _quickInputWindow?.Close();
+        }
+
+        private async Task FlyInAsync()
+        {
+            _isTransitioningVisibility = true;
+            try
+            {
+                Activate();
+                var workArea = SystemParameters.WorkArea;
+                VisibilityChangeDuration = new TimeSpan(0, 0, 0, 0, milliseconds: 400);
+                StartLeftOffset = Math.Max(workArea.Right, Left);
+                EndLeftOffset = workArea.Right - Width;
+                RaiseEvent(new RoutedEventArgs(VisibilityChangedEvent, this));
+                await Task.Delay(VisibilityChangeDuration.TimeSpan);
+                _isVisible = true;
+            }
+            finally
+            {
+                _isTransitioningVisibility = false;
+            }
+        }
+
+        private async Task FlyOutAsync()
+        {
+            _isTransitioningVisibility = true;
+            try
+            {
+                var workArea = SystemParameters.WorkArea;
+                VisibilityChangeDuration = new TimeSpan(0, 0, 0, 0, milliseconds: 200);
+                StartLeftOffset = Math.Min(workArea.Right - Width, Left);
+                EndLeftOffset = workArea.Right;
+                RaiseEvent(new RoutedEventArgs(VisibilityChangedEvent, this));
+                await Task.Delay(VisibilityChangeDuration.TimeSpan);
+                _isVisible = false;
+            }
+            finally
+            {
+                _isTransitioningVisibility = false;
+            }
+}
+
+        private void HandleDwmColorizationColorChanged()
+        {
+            Color newColor = DwmColorizationHelper.GetWindowColorizationColor();
+        }
+
+        private void HandleToggleVisibility()
+        {
+            ToggleVisibilityAsync().GetAwaiter();
+        }
+
+        private async Task ToggleVisibilityAsync()
+        {
+            if (!_isTransitioningVisibility)
+            {
+                if (_isVisible)
+                {
+                    OnDeactivated(new EventArgs());
+                    await FlyOutAsync();
+                }
+                else
+                {
+                    Activate();
+                    await FlyInAsync();
+                }
+            }
+        }
+
+        private async void HandleKeyboardHookKeyDown(object sender, KeyboardHookEventArgs e)
+        {
+            if (!_isHandlingQuickPaste && _systemClipboardPendingState != null && e.Keys == Keys.V)
+            {
+                e.Handled = true;
+                await ClipboardHelper.TryRestoreClipboardStateAsync(this, _systemClipboardPendingState, _copyPasteOpTimeout);
+                _systemClipboardPendingState = null;
+            }
+
+            if (e.Keys == Keys.LControlKey || e.Keys == Keys.RControlKey)
+            {
+                _discardCtrlKeyDownCountdown--;
+                _isCtrlHeld = _discardCtrlKeyDownCountdown != 0;
+            }
+            if (e.Keys == Keys.C)
+            {
+                if (_shouldDiscardNextQuickCopy)
+                {
+                    e.Handled = false;
+                    _shouldDiscardNextQuickCopy = false;
+                }
+                else if(_quickInputWindow != null && _isCtrlHeld)
+                {
+                    e.Handled = true;
+                    _shouldDiscardNextQuickCopy = true;
+                    Dispatcher.InvokeAsync(() => VirtualInput.SendInputCtrlCDontReleaseCtrl()).GetHashCode();
+                    await CloseQuickInputWindowAsync();
+                }
+                else if (_isCtrlHeld)
+                {
+                    e.Handled = true;
+                    _handleCtrlKeyUpCountdown = 1;
+                    HandleQuickCopyPressed();
+                }
+            }
+            if (e.Keys == Keys.V)
+            {
+                if (_shouldDiscardNextQuickPaste)
+                {
+                    e.Handled = false;
+                    _shouldDiscardNextQuickPaste = false;
+                }
+                else if (_quickInputWindow != null && _isCtrlHeld)
+                {
+                    e.Handled = true;
+                    _shouldDiscardNextQuickPaste = true;
+                    Dispatcher.InvokeAsync(async () =>
+                    {
+                        await Exceptions.CatchNotifyCritical(async () =>
+                        {
+                            if (_systemClipboardPendingState != null)
+                            {
+                                await ClipboardHelper.TryRestoreClipboardStateAsync(this, _systemClipboardPendingState, _copyPasteOpTimeout);
+                                _systemClipboardPendingState = null;
+                            }
+                            VirtualInput.SendInputCtrlVDontReleaseCtrl();
+                        });
+                    }).GetHashCode();
+                    await CloseQuickInputWindowAsync();
+                }
+                else if (_isCtrlHeld)
+                {
+                    e.Handled = true;
+                    _handleCtrlKeyUpCountdown = 1;
+                    HandleQuickPastePressed();
+                }
+            }
+            if (_quickInputWindow != null)
+            {
+                e.Handled = true;
+                int keyCode = (int)e.Keys;
+                if (keyCode >= (int)Keys.D0 && keyCode <= (int)Keys.D9)
+                {
+                    _oneTimeHandleKeyUp = e.Keys;
+                    Exceptions.CatchNotifyCritical(() =>
+                    {
+                        _handleQuickActionIndexInput?.Invoke(keyCode - (int)Keys.D0);
+                    });
+                }
+                if (keyCode >= (int)Keys.NumPad0 && keyCode <= (int)Keys.NumPad9)
+                {
+                    _oneTimeHandleKeyUp = e.Keys;
+                    Exceptions.CatchNotifyCritical(() =>
+                    {
+                        _handleQuickActionIndexInput?.Invoke(keyCode - (int)Keys.NumPad0);
+                    });
+                }
+                if (keyCode == (int)Keys.Escape)
+                {
+                    await FlyOutAsync();
+                    Close();
+                }
+            }
+        }
+
+        private async void HandleKeyboardHookKeyUp(object sender, KeyboardHookEventArgs e)
+        {
+            if (e.Keys == Keys.LControlKey || e.Keys == Keys.RControlKey)
+            {
+                _handleCtrlKeyUpCountdown--;
+                _isCtrlHeld = (_handleCtrlKeyUpCountdown) == 0;
+            }
+
+            if (e.Keys == _oneTimeHandleKeyUp)
+            {
+                e.Handled = true;
+                _oneTimeHandleKeyUp = Keys.None;
+            }
+        }
+
+        private async void HandleQuickCopyPressed()
+        {
+            if (_isHandlingQuickCopy || _isHandlingQuickPaste)
+            {
+                return;
+            }
+            _isHandlingQuickCopy = true;
+            
+            _systemClipboardPendingState = await ClipboardHelper.TryDumpClipboardStateAsync(this, _copyPasteOpTimeout);
+            
+            _discardCtrlKeyDownCountdown = 1;
+            VirtualInput.SendInputCtrlC();
+
+            if (_quickInputWindow == null)
+            {
+                _quickInputWindow = new QuickInputWindow(this);
+                _handleQuickActionIndexInput = async index =>
+                {
+                    ClipboardState newClipboardState = await ClipboardHelper.TryDumpClipboardStateAsync(this, _copyPasteOpTimeout);
+
+                    _clipboardStates[index] = newClipboardState;
+
+                    await ClipboardHelper.TryRestoreClipboardStateAsync(this, _systemClipboardPendingState, _copyPasteOpTimeout);
+                    await CloseQuickInputWindowAsync();
+                };
+            }
+        }
+
+        private async void HandleQuickPastePressed()
+        {
+            if (_isHandlingQuickCopy || _isHandlingQuickPaste)
+            {
+                return;
+            }
+            _isHandlingQuickPaste = true;
+            
+            ClipboardState prevClipboardState = await ClipboardHelper.TryDumpClipboardStateAsync(this, _copyPasteOpTimeout);
+            
+            _quickInputWindow = new QuickInputWindow(this);
+            _handleQuickActionIndexInput = async index =>
+            {
+                await ClipboardHelper.TryRestoreClipboardStateAsync(this, _clipboardStates[index], _copyPasteOpTimeout);
+
+                //_discardCtrlKeyDownCountdown = 1;
+                _handleCtrlKeyUpCountdown = 1;
+                VirtualInput.SendInputCtrlV();
+
+                await Task.Delay(16);
+                await CloseQuickInputWindowAsync();
+            };
+        }
+
+        private async Task CloseQuickInputWindowAsync()
+        {
+            if (_quickInputWindow == null)
+            {
+                return;
+            }
+
+            QuickInputWindow windowRef = _quickInputWindow;
+            _quickInputWindow = null;
+            _isHandlingQuickCopy = false;
+            _isHandlingQuickPaste = false;
+            await windowRef.FlyOutAsync();
+            windowRef.Close();
+        }
+    }
+}

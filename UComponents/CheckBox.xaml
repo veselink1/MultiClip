@@ -1,0 +1,104 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:UComponents">
+
+    <Style TargetType="{x:Type local:CheckBox}">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:CheckBox}">
+
+                    <StackPanel 
+                        x:Name="Container"
+                        Background="Transparent"
+                        IsHitTestVisible="True"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                        VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                        Width="{TemplateBinding Width}"
+                        Height="{TemplateBinding Height}"
+                        MaxWidth="{TemplateBinding MaxWidth}"
+                        MaxHeight="{TemplateBinding MaxHeight}"
+                        MinWidth="{TemplateBinding MinWidth}"
+                        MinHeight="{TemplateBinding MinHeight}">
+                        <Canvas 
+                            Width="20"
+                            Height="20"
+                            Margin="0 0 10 0">
+                            <Rectangle
+                                x:Name="Square"
+                                Canvas.Left="0"
+                                Canvas.Top="0"
+                                Fill="Transparent"
+                                Height="20"
+                                Width="20"
+                                StrokeThickness="1.5"
+                                Stroke="{DynamicResource UColorBaseMediumHigh}" 
+                            />
+                            <Path
+                                x:Name="Tick"
+                                Stroke="White"
+                                StrokeThickness="1.5"
+                                Visibility="Hidden">
+                                <Path.Data>
+                                    <GeometryGroup>
+                                        <LineGeometry StartPoint="2, 10" EndPoint="8, 16" />
+                                        <LineGeometry StartPoint="8, 16" EndPoint="18, 4" />
+                                    </GeometryGroup>
+                                </Path.Data>
+                            </Path>
+                        </Canvas>
+                        <ContentPresenter
+                            TextBlock.FontSize="{DynamicResource UFontSizeMedium}"
+                            TextBlock.Foreground="{DynamicResource UColorBaseHigh}"
+                            ContentSource="{TemplateBinding Content}"    
+                        />
+                    </StackPanel>
+
+                    <ControlTemplate.Triggers>
+
+                        <!-- Border Color Triggers -->
+                        <DataTrigger Binding="{Binding Path=IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter 
+                                TargetName="Square" 
+                                Property="Stroke" 
+                                Value="{DynamicResource UColorBaseHigh}" 
+                            />
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding Path=IsMouseDown, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter 
+                                TargetName="Square" 
+                                Property="Stroke" 
+                                Value="{DynamicResource UColorBaseMedium}" 
+                            />
+                        </DataTrigger>
+
+                        <DataTrigger Binding="{Binding Path=IsChecked, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter 
+                                TargetName="Square" 
+                                Property="Stroke" 
+                                Value="{DynamicResource UColorHighlightAccent}" 
+                            />
+                            <Setter 
+                                TargetName="Tick" 
+                                Property="Visibility" 
+                                Value="Visible" 
+                            />
+                            <Setter
+                                TargetName="Square"
+                                Property="Fill"
+                                Value="{DynamicResource UColorHighlightAccent}"
+                            />
+                        </DataTrigger>
+
+                    </ControlTemplate.Triggers>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

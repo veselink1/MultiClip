@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+<Obfuscator>
+    <Var name="InPath" value=".\Obfuscator_Input" />
+    <Var name="OutPath" value=".\Obfuscator_Output" />
+
+    <Module file="$(InPath)\MultiClip.exe" />
+    <Module file="$(InPath)\UComponents.dll" />
+    
+    <Var name="KeepPublicApi" value="true" />
+    <Var name="HidePrivateApi" value="true" />
+</Obfuscator>

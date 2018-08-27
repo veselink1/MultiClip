@@ -1,0 +1,36 @@
+﻿<Window x:Class="MultiClip.Windows.QuickInfoWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MultiClip.Windows"
+        xmlns:controls="clr-namespace:MultiClip.Controls"
+        mc:Ignorable="d"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStyle="None"
+        Topmost="True"
+        UseLayoutRounding="True"
+        ShowInTaskbar="False"
+        ShowActivated="False">
+    <Border>
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="ContentTransform" />
+        </Border.RenderTransform>
+        <Border x:Name="Container" BorderThickness="1" BorderBrush="{DynamicResource UColorBaseLow}">
+            <Grid>
+                <Rectangle
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Fill="{DynamicResource UColorChromeMedium}"
+                />
+                <Border  
+                    x:Name="ContentBorder"
+                    BorderThickness="0" 
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                />
+            </Grid>
+        </Border>
+    </Border>
+</Window>

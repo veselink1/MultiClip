@@ -1,0 +1,14 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:UComponents">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/UComponents;component/Generic.xaml" />
+        <ResourceDictionary Source="/UComponents;component/InteractiveSurface.xaml" />
+        <ResourceDictionary Source="/UComponents;component/Button.xaml" />
+        <ResourceDictionary Source="/UComponents;component/TextBox.xaml" />
+        <ResourceDictionary Source="/UComponents;component/PasswordBox.xaml" />
+        <ResourceDictionary Source="/UComponents;component/RadioButton.xaml" />
+        <ResourceDictionary Source="/UComponents;component/CheckBox.xaml" />
+        <ResourceDictionary Source="/UComponents;component/Slider.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

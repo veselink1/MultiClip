@@ -1,0 +1,56 @@
+﻿<UserControl x:Class="MultiClip.Controls.AutoScrollViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MultiClip.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <UserControl.Resources>
+        <Style x:Key="ControlBorder" TargetType="{x:Type Border}">
+            <Setter Property="IsHitTestVisible" Value="True" />
+            <Setter Property="Background" Value="{DynamicResource UColorAltLow}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource UColorBaseLow}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="{x:Type local:AutoScrollViewer}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type local:AutoScrollViewer}">
+                        <Grid IsHitTestVisible="True" Background="Transparent" TextBlock.Foreground="{DynamicResource UColorBaseHigh}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Border Grid.Row="0" Style="{StaticResource ControlBorder}" x:Name="ScrollUpBorder" Height="15">
+                                <TextBlock
+                                    Text="&#xE971;"
+                                    FontFamily="/UComponents;component/Fonts/#Segoe MDL2 Assets"
+                                    Foreground="{DynamicResource UColorBaseMedium}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                 />
+                            </Border>
+                            <ScrollViewer Grid.Row="1" x:Name="ScrollViewer" VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+                                <ContentPresenter />
+                            </ScrollViewer>
+                            <Border Grid.Row="2" Style="{StaticResource ControlBorder}" x:Name="ScrollDownBorder" Height="15">
+                                <TextBlock
+                                    Text="&#xE972;"
+                                    FontFamily="/UComponents;component/Fonts/#Segoe MDL2 Assets"
+                                    Foreground="{DynamicResource UColorBaseMedium}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                />
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+</UserControl>

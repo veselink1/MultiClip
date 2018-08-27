@@ -1,0 +1,75 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:media="clr-namespace:System.Drawing;assembly=System.Drawing"
+                    xmlns:local="clr-namespace:UComponents">
+
+    <!-- Utility Values -->
+    <sys:Double x:Key="UMaxSize">1.7976931348623157E+308</sys:Double>
+
+    <!-- Font Families -->
+    <Style x:Key="UFontSegoeMDL2Assets">
+        <Setter 
+            Property="TextBlock.FontFamily"
+            Value="/UComponents;component/Fonts/#Segoe MDL2 Assets"
+        />
+    </Style>
+    
+    <!-- Images -->
+    <ImageBrush 
+        x:Key="UVisualNoise"
+        ImageSource="/UComponents;component/Images/Noise.png"
+        AlignmentX="Left"
+        AlignmentY="Top"
+        Viewport="0,0,128,128 "
+        ViewportUnits="Absolute"
+        TileMode="FlipY"
+        Stretch="None"
+    />
+
+    <!-- Font Sizes -->
+    <sys:Double x:Key="UFontSizeSmall">12</sys:Double>
+    <sys:Double x:Key="UFontSizeMedium">15</sys:Double>
+    <sys:Double x:Key="UFontSizeLarge">18.14</sys:Double>
+    <sys:Double x:Key="UFontSizeExtraLarge">25.5</sys:Double>
+
+    <!-- Color Brushes -->
+    <SolidColorBrush x:Key="UColorBaseHighlight" Color="#16000000" />
+    <SolidColorBrush x:Key="UColorBaseLow" Color="#33000000" />
+    <SolidColorBrush x:Key="UColorBaseMediumLow" Color="#66000000" />
+    <SolidColorBrush x:Key="UColorBaseMedium" Color="#99000000" />
+    <SolidColorBrush x:Key="UColorBaseMediumHigh" Color="#CC000000" />
+    <SolidColorBrush x:Key="UColorBaseHigh" Color="#FF000000" />
+    <SolidColorBrush x:Key="UColorAltLow" Color="#33FFFFFF" />
+    <SolidColorBrush x:Key="UColorAltMediumLow" Color="#66FFFFFF" />
+    <SolidColorBrush x:Key="UColorAltMedium" Color="#99FFFFFF" />
+    <SolidColorBrush x:Key="UColorAltMediumHigh" Color="#CCFFFFFF" />
+    <SolidColorBrush x:Key="UColorAltHigh" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="UColorListLow" Color="#19000000" />
+    <SolidColorBrush x:Key="UColorListMedium" Color="#33000000" />
+    <SolidColorBrush x:Key="UColorListAccentLow" Color="#66ABCABC" />
+    <SolidColorBrush x:Key="UColorListAccentMedium" Color="#99ABCABC" />
+    <SolidColorBrush x:Key="UColorListAccentHigh" Color="#B2000000" />
+    <SolidColorBrush x:Key="UColorChromeLow" Color="#FFF2F2F2" />
+    <SolidColorBrush x:Key="UColorChromeMediumLow" Color="#FFF2F2F2" />
+    <SolidColorBrush x:Key="UColorChromeMedium" Color="#FFE6E6E6" />
+    <SolidColorBrush x:Key="UColorChromeMediumAcrylic" Color="#99E6E6E6" />
+    <SolidColorBrush x:Key="UColorChromeHigh" Color="#FFCCCCCC" />
+    <SolidColorBrush x:Key="UColorChromeAltLow" Color="#FF17F7F7" />
+    <SolidColorBrush x:Key="UColorChromeDisabledLow" Color="#FF7A7A7A" />
+    <SolidColorBrush x:Key="UColorChromeDisabledHigh" Color="#FFCCCCCC" />
+    <SolidColorBrush x:Key="UColorChromeBlackLow" Color="#33000000" />
+    <SolidColorBrush x:Key="UColorChromeBlackMediumLow" Color="#66000000" />
+    <SolidColorBrush x:Key="UColorChromeBlackMedium" Color="#CC000000" />
+    <SolidColorBrush x:Key="UColorChromeBlackHigh" Color="#FF000000" />
+    <SolidColorBrush x:Key="UColorChromeWhite" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="UColorHighlightAccent" Color="#FF0078D7" />
+    <SolidColorBrush x:Key="UColorHighlightAccentLow" Color="#330078D7" />
+    <SolidColorBrush x:Key="UColorHighlightAccentMediumLow" Color="#660078D7" />
+    <SolidColorBrush x:Key="UColorHighlightAccentMedium" Color="#990078D7" />
+    <SolidColorBrush x:Key="UColorHighlightAccentMediumHigh" Color="#CC0078D7" />
+    <SolidColorBrush x:Key="UColorHighlightAccentHigh" Color="#FF0078D7" />
+
+    <SolidColorBrush x:Key="UColorReversed" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="UColorReversedReversed" Color="#FF000000" />
+</ResourceDictionary>

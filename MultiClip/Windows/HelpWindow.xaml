@@ -1,0 +1,203 @@
+﻿<Window x:Class="MultiClip.Windows.HelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MultiClip.Windows"
+        xmlns:controls="clr-namespace:MultiClip.Controls"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        x:Name="Self"
+        Height="540" 
+        Width="720"
+        Title=" MultiClip Help"
+        Background="{DynamicResource UColorAltHigh}"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <sys:String x:Key="MultiClipHelpText">MultiClip Help</sys:String>
+        <sys:String x:Key="MultiClipHelpText!bg-BG">MultiClip Помощ</sys:String>
+
+        <sys:String x:Key="KeyboardShortcutsText">Keyboard Shortcuts</sys:String>
+        <sys:String x:Key="KeyboardShortcutsText!bg-BG">Клавишни комбинации</sys:String>
+
+        <sys:String x:Key="ShowHideOverviewText">Ctrl+Space - Show/hide MultiClip Overview</sys:String>
+        <sys:String x:Key="ShowHideOverviewText!bg-BG">Ctrl+Space - Скриване/показване на MutliClip Преглед</sys:String>
+
+        <sys:String x:Key="SecureCopyText">Ctrl+Alt+C - Execute a Secure Copy operation.</sys:String>
+        <sys:String x:Key="SecureCopyText!bg-BG">Ctrl+Alt+C - Изпълни операция Сигурно копиране.</sys:String>
+
+        <sys:String x:Key="GeneralSettingsText">General settings</sys:String>
+        <sys:String x:Key="GeneralSettingsText!bg-BG">Основни настройки</sys:String>
+  
+        <sys:String x:Key="MaxRamUsageText">Maximum system memory usage - Setting the maximum system memory usage using the slider in the general settings view will limit the total RAM usage of the application. If MultiClip exceeds that value, it will start clearing old items from your clipboard until enough memory is made available.</sys:String>
+        <sys:String x:Key="MaxRamUsageText!bg-BG">Максимално използване на системната памет - Задаването на максималното използване на системна памет чрез слайдера в основните настройки ще ограничи цялостното използване на системна памет от приложението. Ако MultiClip превиши зададената стойност, програмаща ще започне да почиства старите записи от клипборда докато не се освободи достатъчно памет.</sys:String>
+
+        <sys:String x:Key="RunAtStartupText">Run application at system startup - Setting this setting to On will add MultiClip to the list of start-up applications.</sys:String>
+        <sys:String x:Key="RunAtStartupText!bg-BG">Стартиране на приложението при стартиране на системата - Включването на тази настройка ще добави MultiClip към списъка на автоматично-стартиращите програми.</sys:String>
+
+        <sys:String x:Key="PersonalizeSettingsText">Personalization settings</sys:String>
+        <sys:String x:Key="PersonalizeSettingsText!bg-BG">Настройки за персонализиране</sys:String>
+
+        <sys:String x:Key="ChooseAppModeText">Choose your app mode - This setting allows you to change the overall look and feel of MultiClip.</sys:String>
+        <sys:String x:Key="ChooseAppModeText!bg-BG">Избери режим на приложението - Тази настройка позволява избирането на цялостния изглед на MultiClip.</sys:String>
+
+        <sys:String x:Key="SecuritySettingsText">Security settings</sys:String>
+        <sys:String x:Key="SecuritySettingsText!bg-BG">Настройки по сигурността</sys:String>
+
+    </Window.Resources>
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextBlock.Foreground="{DynamicResource UColorAltHigh}" TextBlock.FontSize="{DynamicResource UFontSizeMedium}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel
+            Grid.Row="0"
+            Background="{DynamicResource UColorChromeLow}"
+            Orientation="Horizontal"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+            <Border 
+                x:Name="IconBorder"
+                Grid.Column="0"
+                Padding="15 10 15 10" 
+                HorizontalAlignment="Left"
+                VerticalAlignment="Stretch">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="&#xE897;" 
+                    FontSize="20"
+                    Foreground="{DynamicResource UColorBaseHigh}"
+                    FontFamily="Segoe MDL2 Assets"
+                />
+            </Border>
+            <TextBlock
+                Grid.Column="1"
+                Padding="0 10 15 10" 
+                Text="{DynamicResource MultiClipHelpText}" 
+                FontSize="{DynamicResource UFontSizeLarge}" 
+                Foreground="{DynamicResource UColorBaseHigh}"
+            />
+        </StackPanel>
+
+        <ScrollViewer 
+            VerticalAlignment="Stretch" 
+            HorizontalAlignment="Stretch" 
+            VerticalScrollBarVisibility="Auto" 
+            HorizontalScrollBarVisibility="Disabled" 
+            Grid.Row="1"
+            Template="{StaticResource ScrollViewerControlTemplate}">
+            <Border>
+                <StackPanel Margin="15 15 15 15">
+
+                    <StackPanel 
+                        Orientation="Horizontal"
+                        Margin="0 0 0 15">
+                        <TextBlock
+                            Text="{DynamicResource KeyboardShortcutsText}" 
+                            FontSize="{DynamicResource UFontSizeLarge}"
+                            Foreground="{DynamicResource UColorBaseHigh}"
+                        />
+                        <TextBlock 
+                            Text="&#xEDA7;" 
+                            FontSize="{DynamicResource UFontSizeMedium}"
+                            Foreground="{DynamicResource UColorBaseHigh}"
+                            FontFamily="Segoe MDL2 Assets" 
+                            Margin="10 0 0 0"
+                        />
+                    </StackPanel>
+
+                    <TextBlock
+                        Margin="0 0 0 15"
+                        Text="{DynamicResource ShowHideOverviewText}"
+                        Foreground="{DynamicResource UColorBaseMediumHigh}"
+                        TextWrapping="WrapWithOverflow"
+                    />
+
+                    <TextBlock
+                        Margin="0 0 0 15"
+                        Text="{DynamicResource SecureCopyText}"
+                        Foreground="{DynamicResource UColorBaseMediumHigh}"
+                        TextWrapping="WrapWithOverflow"
+                    />
+
+                    <StackPanel 
+                        Orientation="Horizontal"
+                        Margin="0 10 0 15">
+                        <TextBlock
+                            Text="{DynamicResource GeneralSettingsText}" 
+                            FontSize="{DynamicResource UFontSizeLarge}"
+                            Foreground="{DynamicResource UColorBaseHigh}"
+                        />
+                        <TextBlock 
+                            Text="&#xE90F;" 
+                            FontSize="{DynamicResource UFontSizeMedium}"
+                            Foreground="{DynamicResource UColorBaseHigh}"
+                            FontFamily="Segoe MDL2 Assets" 
+                            VerticalAlignment="Center"
+                            Margin="10 0 0 0"
+                        />
+                    </StackPanel>
+
+                    <TextBlock
+                        Margin="0 0 0 15"
+                        Text="{DynamicResource MaxRamUsageText}"
+                        Foreground="{DynamicResource UColorBaseMediumHigh}"
+                        TextWrapping="WrapWithOverflow"
+                    />
+
+                    <TextBlock
+                        Margin="0 0 0 15"
+                        Text="{DynamicResource RunAtStartupText}"
+                        Foreground="{DynamicResource UColorBaseMediumHigh}"
+                        TextWrapping="WrapWithOverflow"
+                    />
+
+                    <StackPanel 
+                        Orientation="Horizontal"
+                        Margin="0 10 0 15">
+                        <TextBlock
+                            Text="{DynamicResource PersonalizeSettingsText}" 
+                            FontSize="{DynamicResource UFontSizeLarge}"
+                            Foreground="{DynamicResource UColorBaseHigh}"
+                        />
+                        <TextBlock 
+                            Text="&#xE771;" 
+                            FontSize="{DynamicResource UFontSizeMedium}"
+                            Foreground="{DynamicResource UColorBaseHigh}"
+                            FontFamily="Segoe MDL2 Assets" 
+                            VerticalAlignment="Center"
+                            Margin="10 0 0 0"
+                        />
+                    </StackPanel>
+
+                    <TextBlock
+                        Margin="0 0 0 15"
+                        Text="{DynamicResource ChooseAppModeText}"
+                        Foreground="{DynamicResource UColorBaseMediumHigh}"
+                        TextWrapping="WrapWithOverflow"
+                    />
+
+                    <StackPanel 
+                        Orientation="Horizontal"
+                        Margin="0 10 0 15">
+                        <TextBlock
+                            Text="{DynamicResource SecuritySettingsText}" 
+                            FontSize="{DynamicResource UFontSizeLarge}"
+                            Foreground="{DynamicResource UColorBaseHigh}"
+                        />
+                        <TextBlock 
+                            Text="&#xE72E;" 
+                            FontSize="{DynamicResource UFontSizeMedium}"
+                            Foreground="{DynamicResource UColorBaseHigh}"
+                            VerticalAlignment="Center"
+                            FontFamily="Segoe MDL2 Assets" 
+                            Margin="10 0 0 0"
+                        />
+                    </StackPanel>
+
+                </StackPanel>
+            </Border>
+        </ScrollViewer>
+    </Grid>
+</Window>
