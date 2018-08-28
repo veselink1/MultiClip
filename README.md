@@ -1,5 +1,5 @@
 # MultiClip - unlock the full potential of the clipboard
-### Contributors - [veselink1](https://github.com/veselink1), [lubomarinski](https://github.com/lubomarinski)
+#### Contributors - [veselink1](https://github.com/veselink1), [lubomarinski](https://github.com/lubomarinski)
 ## Features
 • Store multiple items in the clipboard and access the from anywhere
 
