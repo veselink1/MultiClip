@@ -1,28 +1,39 @@
-# MultiClip - Copy&Paste V2
-### Contributers - veselink1, lubomarinski
-
-## MultiClip allows users to unlock the full potential of the Clipboard. 
-
+# [MultiClip - unlock the full potential of the clipboard](https://veselink1.github.io/multiclip.me/)
+#### Contributors - [veselink1](https://github.com/veselink1), [lubomarinski](https://github.com/lubomarinski)
+#### [Official website](https://veselink1.github.io/multiclip.me/)
 ## Features
 • Store multiple items in the clipboard and access the from anywhere
+
 • Share clipboard items across network devices
+
 • In-memory clipboard item compression for large items
+
 • Supports a large variety of formats, including (plain text, rich text, images, file drops and more)
+
 • Uses a simple and fast interface
+
 • Does *not* steal focus when the window is opened and allows for uninterrupted work experience 
+
 • Entirely customizable (choose a theme, change the accent color, and toggle transparency and blur)
+
 • Both keyboard and touch-optimized, to allow to be used on a variety of devices
+
 • Uses efficient low-level Win32 APIs to optimize for performace and memory
+
 • Optionally use the deskband, which is an Explorer extension that blends into the taskbar
+
 • The application is multilingual (currently supports English and Bulgarian)
+
 • Checking for updates and newer versions of the app (WIP)
+
 • User-specified system memory usage limit, to limit the number of items stored in RAM (WIP)
+
 • Explicit exclusion of the current clipboard state from the list
 
 ## Screenshots
 
-![Image 1](Screenshot (123).png)
-![Image 2](Screenshot (123).png)
+![Image 1](https://raw.githubusercontent.com/veselink1/MultiClip/master/Screenshots/Screenshot%20(123).png)
+![Image 2](https://raw.githubusercontent.com/veselink1/MultiClip/master/Screenshots/Screenshot%20(124).png)
 
 ## Information
 The core application is written in C# and uses the WPF framework. All the controls are customized to reflect the UWP (Acrylic) design Microsft is promoting with Windows 10. The application makes use of low-level Windows APIs, unsafe C# code, WeakReferences and in-memory compression through UnmanagedMemoryStream to increase throughput and performance, reduce memory requirements and minimize stress on the .NET GC. The collection of data from the clipboard is simultaneous and uninterrupting. Restoring a previous clipboard state is also efficient. 
