@@ -52,8 +52,7 @@ namespace MultiClip
             AppState.Current = new AppState
             {
                 UserSettings = UserSettings.LoadFromDisk(),
-                LocalStates = new ObservableCollection<Clipboard.ClipboardState>(),
-                RemoteClipboardStates = new ObservableCollection<RemoteClipboardState>(),
+                ClipboardStates = new ObservableCollection<Clipboard.ClipboardState>(),
             };
 
             // Set the required registry keys.

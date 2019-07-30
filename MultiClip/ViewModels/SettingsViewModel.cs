@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security;
@@ -20,7 +21,6 @@ namespace MultiClip.ViewModels
         private readonly UserSettings _model;
         private string _secureStringText = "";
         private bool _isRunOnStartupEnabled;
-        private long _totalPhysMem;
         private ILogger _logger = Logger.Default;
 
         public SettingsViewModel(Window window, UserSettings userSettings)
@@ -28,7 +28,6 @@ namespace MultiClip.ViewModels
             _window = window;
             _model = userSettings;
 
-            _totalPhysMem = MemStats.GetTotalPhysicalMemory();
             _isRunOnStartupEnabled = IsSetToRunAtStartup();
         }
 
@@ -36,18 +35,17 @@ namespace MultiClip.ViewModels
 
         public Theme Theme => _model.Theme;
 
-        public string MaxRamUsageText => 
-            $"{(int)Math.Round(MaxRamUsage)}% ({(Math.Ceiling(MaxRamUsage / 100f * _totalPhysMem / 1024f / 1024f) / 1000f).ToString("0.0")}GB)";
+        public string MaxItemsText => MaxItems.ToString();
 
-        public float MaxRamUsage
+        public int MaxItems
         {
-            get => _model.MaxRamUsage;
+            get => _model.MaxItems;
             set
             {
-                _model.MaxRamUsage = Math.Max(5f, Math.Min(value, 75f));
+                _model.MaxItems = Math.Max(5, Math.Min(value, 100));
                 BeginSaveToDisk();
                 NotifyPropertyChanged();
-                NotifyPropertyChanged(nameof(MaxRamUsageText));
+                NotifyPropertyChanged(nameof(MaxItemsText));
             }
         }
 

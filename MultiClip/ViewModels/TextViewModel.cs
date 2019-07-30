@@ -7,8 +7,8 @@ namespace MultiClip.ViewModels
     public class TextViewModel : ClipboardViewModel
     {
         public TextViewModel(ClipboardState state, DateTime dateTime, 
-            Host optionalHost, Action<ClipboardViewModel> onPaste, Action<ClipboardViewModel> onDelete) 
-                : base(state, dateTime, optionalHost, onPaste, onDelete)
+            Action<ClipboardViewModel> onPaste, Action<ClipboardViewModel> onDelete) 
+                : base(state, dateTime, onPaste, onDelete)
         {
         }
 

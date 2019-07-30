@@ -36,8 +36,8 @@
         <sys:String x:Key="UpdateText">Update</sys:String>
         <sys:String x:Key="UpdateText!bg-BG">Актуализация</sys:String>
 
-        <sys:String x:Key="MaxRamUsageText">Maximum system memory usage: </sys:String>
-        <sys:String x:Key="MaxRamUsageText!bg-BG">Максимално използване на системната памет:</sys:String>
+        <sys:String x:Key="MaxItemsText">Maximum number of items stored: </sys:String>
+        <sys:String x:Key="MaxItemsText!bg-BG">Максималнен брой на съхранени елементи:</sys:String>
 
         <sys:String x:Key="RunAtStartupText">Run application at system startup: </sys:String>
         <sys:String x:Key="RunAtStartupText!bg-BG">Стартиране приложението при стартиране на системата:</sys:String>
@@ -223,12 +223,12 @@
 
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock
-                                        Text="{DynamicResource MaxRamUsageText}" 
+                                        Text="{DynamicResource MaxItemsText}" 
                                         TextWrapping="WrapWithOverflow"
                                         Margin="0 0 5 15"
                                     />
                                     <TextBlock
-                                        Text="{Binding MaxRamUsageText}"
+                                        Text="{Binding MaxItemsText}"
                                     />
                                 </StackPanel>
 
@@ -236,7 +236,7 @@
                                     HorizontalAlignment="Left"
                                     Width="256"
                                     Margin="0 0 0 15"
-                                    Value="{Binding MaxRamUsage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Value="{Binding MaxItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     Minimum="5"
                                     Maximum="100"
                                     TickFrequency="5"
@@ -389,28 +389,26 @@
                                 />
 
                                 <TextBlock
-                                    Text="MultiClip v1.0.0"
+                                    Text="MultiClip v0.1.0"
                                     TextWrapping="WrapWithOverflow"
                                     FontSize="{DynamicResource UFontSizeMedium}"
                                     Foreground="{DynamicResource UColorBaseHigh}"
                                     Margin="0 0 0 15"
                                 />
+
                                 <TextBlock
-                                    Text="© 2018 All rights reserved."
                                     TextWrapping="WrapWithOverflow"
                                     FontSize="{DynamicResource UFontSizeMedium}"
                                     Foreground="{DynamicResource UColorBaseHigh}"
-                                    Margin="0 0 0 15"
-                                />
-                                <TextBlock
-                                    Text="The MultiClip application and its user interface are protected by copyright and are subject to intellectual property."
-                                    MaxWidth="500"
-                                    HorizontalAlignment="Left"
-                                    TextWrapping="WrapWithOverflow"
-                                    FontSize="{DynamicResource UFontSizeMedium}"
-                                    Foreground="{DynamicResource UColorBaseHigh}"
-                                    Margin="0 0 0 15"
-                                />
+                                    Margin="0 0 0 15">
+                                    Authors:
+                                    <Hyperlink RequestNavigate="OnRequestNavigate" NavigateUri="https://github.com/veselink1">
+                                        @veselink1
+                                    </Hyperlink>,
+                                    <Hyperlink RequestNavigate="OnRequestNavigate" NavigateUri="https://github.com/lubomarinski">
+                                        @lubomarinski
+                                    </Hyperlink>
+                                </TextBlock>
 
                             </StackPanel>
 

@@ -29,8 +29,8 @@
         <sys:String x:Key="GeneralSettingsText">General settings</sys:String>
         <sys:String x:Key="GeneralSettingsText!bg-BG">Основни настройки</sys:String>
   
-        <sys:String x:Key="MaxRamUsageText">Maximum system memory usage - Setting the maximum system memory usage using the slider in the general settings view will limit the total RAM usage of the application. If MultiClip exceeds that value, it will start clearing old items from your clipboard until enough memory is made available.</sys:String>
-        <sys:String x:Key="MaxRamUsageText!bg-BG">Максимално използване на системната памет - Задаването на максималното използване на системна памет чрез слайдера в основните настройки ще ограничи цялостното използване на системна памет от приложението. Ако MultiClip превиши зададената стойност, програмаща ще започне да почиства старите записи от клипборда докато не се освободи достатъчно памет.</sys:String>
+        <sys:String x:Key="MaxItemsText">Maximum system memory usage - Setting the maximum system memory usage using the slider in the general settings view will limit the total RAM usage of the application. If MultiClip exceeds that value, it will start clearing old items from your clipboard until enough memory is made available.</sys:String>
+        <sys:String x:Key="MaxItemsText!bg-BG">Максимално използване на системната памет - Задаването на максималното използване на системна памет чрез слайдера в основните настройки ще ограничи цялостното използване на системна памет от приложението. Ако MultiClip превиши зададената стойност, програмаща ще започне да почиства старите записи от клипборда докато не се освободи достатъчно памет.</sys:String>
 
         <sys:String x:Key="RunAtStartupText">Run application at system startup - Setting this setting to On will add MultiClip to the list of start-up applications.</sys:String>
         <sys:String x:Key="RunAtStartupText!bg-BG">Стартиране на приложението при стартиране на системата - Включването на тази настройка ще добави MultiClip към списъка на автоматично-стартиращите програми.</sys:String>
@@ -141,7 +141,7 @@
 
                     <TextBlock
                         Margin="0 0 0 15"
-                        Text="{DynamicResource MaxRamUsageText}"
+                        Text="{DynamicResource MaxItemsText}"
                         Foreground="{DynamicResource UColorBaseMediumHigh}"
                         TextWrapping="WrapWithOverflow"
                     />

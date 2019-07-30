@@ -43,8 +43,8 @@ namespace MultiClip.Network.Messages
             return new ClipboardInfoResponse
             {
                 States = (knownStateGuids != null
-                    ? AppState.Current.LocalStates.Where(x => !knownStateGuids.Contains(x.Id))
-                    : AppState.Current.LocalStates)
+                    ? AppState.Current.ClipboardStates.Where(x => !knownStateGuids.Contains(x.Id))
+                    : AppState.Current.ClipboardStates)
                     .Select(x =>
                     {
                         ClipboardItem item = ClipboardParser.GetPreferredItem(x.Items, serializable: true);
@@ -96,7 +96,7 @@ namespace MultiClip.Network.Messages
 
         public static ClipboardStateResponse GetResponse(Guid stateId)
         {
-            ClipboardState state = AppState.Current.LocalStates.FirstOrDefault(x => x.Id == stateId);
+            ClipboardState state = AppState.Current.ClipboardStates.FirstOrDefault(x => x.Id == stateId);
             ClipboardItem item = state?.Items.FirstOrDefault(
                 x => ClipboardParser.CanSerialize(ClipboardParser.GetAbstractFormat(x.Format)));
 
@@ -149,7 +149,7 @@ namespace MultiClip.Network.Messages
             Task.Run(async () =>
             {
                 var endPoint = new IPEndPoint(remoteIP, NetConfig.Port);
-                var host = AppState.Current.RemoteClipboardStates.FirstOrDefault(x => x.Identity.EndPoint.Address.Equals(endPoint.Address));
+                RemoteClipboardState host = null; // AppState.Current.RemoteClipboardStates.FirstOrDefault(x => x.Identity.EndPoint.Address.Equals(endPoint.Address));
                 if (host != null)
                 {
                     var res = await host.Identity.SendAsync(new ClipboardStateRequest(stateId));

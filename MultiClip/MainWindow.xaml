@@ -9,7 +9,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Overview - MultiClip" 
-        Height="420" 
+        Height="374" 
         Width="740" 
         AllowsTransparency="True"
         Opacity="0"
@@ -21,17 +21,8 @@
         OpacityMask="Black"
         SnapsToDevicePixels="True">
     <Window.Resources>
-        <sys:String x:Key="MultiClipOverview">MultiClip Overview</sys:String>
-        <sys:String x:Key="MultiClipOverview!bg-BG">MultiClip Преглед</sys:String>
-        
-        <sys:String x:Key="ThisPC">This PC</sys:String>
-        <sys:String x:Key="ThisPC!bg-BG">Този компютър</sys:String>
-        
-        <sys:String x:Key="MyDevices">My Devices</sys:String>
-        <sys:String x:Key="MyDevices!bg-BG">Моите устройства</sys:String>
-        
-        <sys:String x:Key="SignUp">Sign Up</sys:String>
-        <sys:String x:Key="SignUp!bg-BG">Регистрация</sys:String>
+        <sys:String x:Key="MultiClipOverview">My Clipboard</sys:String>
+        <sys:String x:Key="MultiClipOverview!bg-BG">Моят Клипборд</sys:String>
 
         <Style x:Key="HighlightBorder" TargetType="{x:Type Border}">
             <Setter Property="Background" Value="Transparent"/>
@@ -64,9 +55,9 @@
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="0">
                     <Border
-                        Width="35"
-                        Height="35"
-                        Margin="15 10 0 0"
+                        Width="25"
+                        Height="25"
+                        Margin="10"
                         IsHitTestVisible="True"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center" 
@@ -82,7 +73,7 @@
                             Style="{DynamicResource UFontSegoeMDL2Assets}"
                         />
                     </Border>
-                    <StackPanel VerticalAlignment="Center" Margin="25 10 0 0" Orientation="Vertical">
+                    <StackPanel VerticalAlignment="Center" Margin="10 10 10 5" Orientation="Vertical">
                         <TextBlock
                             Text="{DynamicResource MultiClipOverview}"
                             Foreground="{DynamicResource UColorBaseMediumHigh}"
@@ -96,14 +87,14 @@
                         <Border 
                             Margin="0 5 0 0"
                             Height="1" 
-                            Width="200"
+                            Width="140"
                             Background="{DynamicResource UColorHighlightAccent}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Border
-                        Width="35"
-                        Height="35"
-                        Margin="0 15 15 10"
+                        Width="25"
+                        Height="25"
+                        Margin="10"
                         IsHitTestVisible="True"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center" 
@@ -114,7 +105,7 @@
                             Margin="0 2 0 0"
                             TextAlignment="Center"
                             VerticalAlignment="Center"
-                            FontSize="16"
+                            FontSize="14"
                             Foreground="{DynamicResource UColorBaseHigh}"
                             Style="{DynamicResource UFontSegoeMDL2Assets}"
                         />
@@ -123,112 +114,8 @@
                 </Grid>
 
                 <StackPanel Grid.Row="1" Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel.Resources>
-                            <Style x:Key="HeaderTextBlock" TargetType="{x:Type TextBlock}">
-                                <Setter Property="FontWeight" Value="Light" />
-                                <Setter Property="Foreground" Value="{DynamicResource UColorBaseMediumHigh}" />
-                                <Style.Triggers>
-                                    <Trigger Property="local:MainWindow.IsSelected" Value="True">
-                                        <Setter Property="FontWeight" Value="Normal" />
-                                        <Setter Property="Foreground" Value="{DynamicResource UColorBaseHigh}" />
-                                    </Trigger>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Foreground" Value="{DynamicResource UColorBaseHigh}" />
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </StackPanel.Resources>
-                        <TextBlock
-                            x:Name="LocalHeader"
-                            local:MainWindow.IsSelected="True"
-                            Text="{DynamicResource ThisPC}"
-                            FontFamily="Segoe UI"
-                            FontSize="20"
-                            Style="{StaticResource HeaderTextBlock}"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            TextAlignment="Center"
-                            Margin="30 0 10 10"
-                        />
-                        <TextBlock
-                            x:Name="SharedHeader"
-                            local:MainWindow.IsSelected="False"
-                            Text="{DynamicResource MyDevices}"
-                            FontFamily="Segoe UI"
-                            FontSize="20"
-                            Style="{StaticResource HeaderTextBlock}"
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            TextAlignment="Center"
-                            Margin="30 0 10 10"
-                        />
-                    </StackPanel>
-
                     <StackPanel Margin="0 5 0 0">
-                        <Border x:Name="LocalView" Visibility="Visible">
-                            <controls:ClipboardList x:Name="LocalList" />
-                        </Border>
-                        <Grid x:Name="RemoteView" Visibility="Collapsed">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="256" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <ScrollViewer
-                                Grid.Column="0" 
-                                VerticalScrollBarVisibility="Visible"
-                                HorizontalScrollBarVisibility="Hidden"
-                                Template="{StaticResource ScrollViewerControlTemplate}">
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal" x:Name="RemoteHostListEmptyMessage" Margin="25 15">
-                                        <TextBlock
-                                            Text="&#xE895;"   
-                                            VerticalAlignment="Center"
-                                            FontFamily="/UComponents;component/Fonts/#Segoe MDL2 Assets"
-                                        />
-                                        <TextBlock  
-                                            Text="Looking for devices..."
-                                            VerticalAlignment="Center"
-                                            Margin="15 0 0 0"
-                                            Foreground="{DynamicResource UColorBaseMedium}"
-                                        />
-                                    </StackPanel>
-                                    <ListView 
-                                        x:Name="RemoteHostList" 
-                                        Background="{x:Null}"
-                                        BorderBrush="{x:Null}"
-                                        ItemsSource="{Binding RemoteHosts}"
-                                        ItemContainerStyle="{StaticResource ListViewItemContainerStyle}">
-                                        <ListView.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Background="{x:Null}" Orientation="Vertical" />
-                                            </ItemsPanelTemplate>
-                                        </ListView.ItemsPanel>
-                                        <ListView.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border Padding="35 15">
-                                                    <Border.Style>
-                                                        <Style TargetType="{x:Type Border}">
-                                                            <Style.Triggers>
-                                                                <Trigger Property="IsMouseOver" Value="True">
-                                                                    <Setter Property="Background" Value="{DynamicResource UColorBaseHighlight}" />
-                                                                </Trigger>
-                                                            </Style.Triggers>
-                                                        </Style>
-                                                    </Border.Style>
-                                                    <u:CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" Group="RemoteMachines">
-                                                        <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" Margin="5 0 0 0" Foreground="{DynamicResource UColorBaseHigh}" />
-                                                    </u:CheckBox>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ListView.ItemTemplate>
-                                    </ListView>
-                                </StackPanel>
-                            </ScrollViewer>
-                            <controls:ClipboardList 
-                                Grid.Column="1" 
-                                x:Name="RemoteList" />
-                        </Grid>
+                        <controls:ClipboardList x:Name="ClipboardList" />
                     </StackPanel>
                 </StackPanel>
             </Grid>

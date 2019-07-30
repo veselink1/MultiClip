@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Navigation;
 using MultiClip.Intl;
 using MultiClip.Models;
 using MultiClip.Utilities;
@@ -52,6 +55,11 @@ namespace MultiClip.Windows
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
             new HelpWindow { Owner = this }.Show();
+        }
+
+        private void OnRequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(e.Uri.AbsoluteUri);
         }
     }
 }
