@@ -4,8 +4,6 @@
 ## Features
 • Store multiple items in the clipboard and access the from anywhere
 
-• Share clipboard items across network devices
-
 • In-memory clipboard item compression for large items
 
 • Supports a large variety of formats, including (plain text, rich text, images, file drops and more)
@@ -25,8 +23,6 @@
 • The application is multilingual (currently supports English and Bulgarian)
 
 • Checking for updates and newer versions of the app (WIP)
-
-• User-specified system memory usage limit, to limit the number of items stored in RAM (WIP)
 
 • Explicit exclusion of the current clipboard state from the list
 
