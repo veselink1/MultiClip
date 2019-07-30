@@ -22,7 +22,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <controls:AutoScrollViewer>
-                <TextBlock Text="{Binding Text}" Margin="10" TextWrapping="WrapWithOverflow" Foreground="{DynamicResource UColorBaseHigh}" />
+                <TextBlock Text="{Binding Text}" Margin="10" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource UColorBaseHigh}" />
             </controls:AutoScrollViewer>
         </Border>
         <Border x:Key="{x:Type viewmodels:ImageViewModel}" Background="{DynamicResource UColorChromeMediumLow}">

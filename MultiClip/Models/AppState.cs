@@ -21,12 +21,7 @@ namespace MultiClip.Models
         /// <summary>
         /// The list of the local clipboard states.
         /// </summary>
-        public ObservableCollection<ClipboardState> LocalStates { get; set; }
-
-        /// <summary>
-        /// The list of the known remote hosts and their states.
-        /// </summary>
-        public ObservableCollection<RemoteClipboardState> RemoteClipboardStates { get; set; }
+        public ObservableCollection<ClipboardState> ClipboardStates { get; set; }
         
         /// <summary>
         /// Creates a new application state.

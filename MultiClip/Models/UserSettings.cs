@@ -8,6 +8,7 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using MultiClip.Network;
 using MultiClip.Utilities;
 using Newtonsoft.Json;
@@ -53,9 +54,9 @@ namespace MultiClip.Models
         [JsonConverter(typeof(StringEnumConverter))]
         public Theme Theme { get; set; } = Theme.Dark;
         /// <summary>
-        /// The maximum percentage of system memory to use (in percentages).
+        /// The maximum number of items stored.
         /// </summary>
-        public float MaxRamUsage { get; set; } = 10f;
+        public int MaxItems { get; set; } = 10;
         /// <summary>
         /// The unique identifier of this machine.
         /// </summary>
@@ -116,14 +117,37 @@ namespace MultiClip.Models
             if (File.Exists(DefaultPath))
             {
                 var json = File.ReadAllText(DefaultPath, Encoding.UTF8);
-                return JsonConvert.DeserializeObject<UserSettings>(json);
+                try
+                {
+                    return JsonConvert.DeserializeObject<UserSettings>(json);
+                }
+                catch (Exception)
+                {
+                    MessageBoxResult ans = MessageBox.Show("The user settings file was corrupted! Do you want MultiClip to " 
+                        + "overwrite the corrupted file with the default configuration?\nPress No to exit.", 
+                        "MultiClip", MessageBoxButton.YesNo, MessageBoxImage.Asterisk);
+                    if (ans == MessageBoxResult.Yes)
+                    {
+                        return CreateDefaultSettings();
+                    }
+                    else
+                    {
+                        Environment.Exit(0);
+                        return null;
+                    }
+                }
             }
             else
             {
-                var settings = new UserSettings();
-                settings.SaveToDisk();
-                return settings;
+                return CreateDefaultSettings();
             }
+        }
+
+        private static UserSettings CreateDefaultSettings()
+        {
+            var settings = new UserSettings();
+            settings.SaveToDisk();
+            return settings;
         }
     }
 }

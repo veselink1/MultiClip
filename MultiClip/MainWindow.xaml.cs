@@ -114,16 +114,6 @@ namespace MultiClip
         private ClipboardManager _clipboardManager;
 
         /// <summary>
-        /// The LAN communication server.
-        /// </summary>
-        private Server _lanServer;
-
-        /// <summary>
-        /// The LanScanner instance used for detecting available application instances.
-        /// </summary>
-        private LanScanner _lanScanner;
-
-        /// <summary>
         /// A reference to the logger instance. 
         /// Should be replaced with a DI instance.
         /// </summary>
@@ -210,18 +200,6 @@ namespace MultiClip
 
                 // Set the window's view-model.
                 _viewModel = new OverviewViewModel();
-                // When the remote hosts collection is empty,
-                // toggle the appropriate message.
-                _viewModel.RemoteHosts.CollectionChanged += delegate
-                {
-                    if (_viewModel.RemoteHosts.Any())
-                    {
-                        RemoteHostListEmptyMessage.Visibility = Visibility.Visible;
-                    }
-                    {
-                        RemoteHostListEmptyMessage.Visibility = Visibility.Collapsed;
-                    }
-                };
                 
                 InitializeQuickInfoWindow();
 
@@ -261,16 +239,6 @@ namespace MultiClip
                 _secureCopyHotkey.Pressed += OnSecureCopyHotkeyPressed;
                 _secureCopyHotkey.Register();
 
-                // Initialize and start the LanScanner.
-                _lanScanner = new LanScanner(
-                    scanInterval: TimeSpan.FromSeconds(10), 
-                    enableBackgroundScanning: true);
-                _lanScanner.CurrentHosts.CollectionChanged += OnRemoteHostsChanged;
-
-                // Initialize and start the LAN server.
-                _lanServer = new Server();
-                _lanServer.Start();
-
                 // Show the help window on the first run of the app.
                 if ((bool)Properties.Settings.Default["IsFirstRun"] == true)
                 {
@@ -280,23 +248,7 @@ namespace MultiClip
                     helpWindow.Show();
                 }
 
-                // Bind the syntetic handlers for header clicks.
-                LocalHeader.AddClickHandler(delegate
-                {
-                    SetIsSelected(LocalHeader, true);
-                    SetIsSelected(SharedHeader, false);
-                    SetCurrentView(ViewVariant.LocalClipboard);
-                });
-
-                SharedHeader.AddClickHandler(delegate
-                {
-                    SetIsSelected(SharedHeader, true);
-                    SetIsSelected(LocalHeader, false);
-                    SetCurrentView(ViewVariant.RemoteClipboard);
-                });
-
-                // Set the view to be initially LocalClipboard.
-                SetCurrentView(ViewVariant.LocalClipboard);
+                ClipboardList.ItemsSource = _viewModel.ClipboardItems;
 
                 // When a file-drop item is about to open a subwindow,
                 // hide the main window.
@@ -307,23 +259,6 @@ namespace MultiClip
                         HideAsync().GetAwaiter();
                     }
                 };
-
-                // Update the network states with an interval.
-                async Task updateNetworkState()
-                {
-                    try
-                    {
-                        await UpdateNetworkStatesAsync();
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogWarn(LogEvents.NetErr, e);
-                    }
-                    await Task.Delay(5000);
-                    Task.Run(updateNetworkState).GetAwaiter();
-                }
-
-                Task.Run(updateNetworkState).GetAwaiter();
             }
             catch (Exception e)
             {
@@ -342,7 +277,6 @@ namespace MultiClip
             _dropShadow?.Hide();
             _wmr?.Dispose();
             _quickInfoWindow?.Close();
-            _lanServer?.Stop();
             Environment.Exit(0);
         }
 
@@ -405,82 +339,33 @@ namespace MultiClip
             }
         }
 
-        private void CollectStatesByMemUsage()
+        private void CollectStates()
         {
-            long memUsage = AppState.Current.LocalStates
-                .SelectMany(x => x.Items)
-                .Select(x => (long)x.SizeInMemory)
-                .Sum();
+            int maxItems = AppState.Current.UserSettings.MaxItems;
+            var states = AppState.Current.ClipboardStates;
 
-            long maxUsage = (long)(MemStats.GetTotalPhysicalMemory() * (AppState.Current.UserSettings.MaxRamUsage / 100f));
-
-            if (memUsage > maxUsage)
+            for (int i = maxItems - 1; i < states.Count; i++)
             {
-                long diff = memUsage - maxUsage;
-                long freeTotal = 0;
-                List<ClipboardState> statesToRemove = new List<ClipboardState>();
-                List<ClipboardViewModel> viewModelsToRemove = new List<ClipboardViewModel>();
-                foreach (var state in AppState.Current.LocalStates.Reverse())
-                {
-                    if (freeTotal >= diff)
-                    {
-                        break;
-                    }
-                    statesToRemove.Add(state);
-                    viewModelsToRemove.Add(_viewModel.LocalClipboards.First(x => ReferenceEquals(x.State, state)));
-                    freeTotal += state.Items.Sum(x => (long)x.SizeInMemory);
-                }
-                foreach (var state in statesToRemove)
-                {
-                    AppState.Current.LocalStates.Remove(state);
-                }
-                foreach (var viewModel in viewModelsToRemove)
-                {
-                    _viewModel.LocalClipboards.Remove(viewModel);
-                }
+                states.RemoveAt(maxItems - 1);
             }
         }
 
-        private async void OnClipboardStateChanged(ClipboardState newState)
+        private void OnClipboardStateChanged(ClipboardState newState)
         {
             try
             {
-                CollectStatesByMemUsage();
+                CollectStates();
 
-                var viewModel = CreateClipboardViewModel(newState, optionalHost: null);
-                AppState.Current.LocalStates.Insert(0, newState);
-                _viewModel.LocalClipboards.Insert(0, viewModel);
+                var viewModel = CreateClipboardViewModel(newState);
+                AppState.Current.ClipboardStates.Insert(0, newState);
+                _viewModel.ClipboardItems.Insert(0, viewModel);
 
                 MarkCurrentViewModel(viewModel);
 
-                var content = new ClipboardItemControl { ContentSource = viewModel };
-                Task quickInfoTask = _quickInfoWindow.ShowContentAsync(
-                    content,
-                    TimeSpan.FromSeconds(2));
-
-                if (viewModel is TextViewModel || viewModel is ImageViewModel)
-                {
-                    var enabledMachineGuids = AppState.Current.UserSettings.EnabledMachineGuids;
-                    Task netNotifyTask = Task.WhenAll(AppState.Current.RemoteClipboardStates
-                        .Select(x => x.Identity)
-                        .Where(x => enabledMachineGuids.Contains(x.MachineGuid))
-                        .Select(x => x.SendAsync(new ClipboardNotifyChangedRequest(newState.Id))));
-
-                    try
-                    {
-                        await Task.WhenAll(
-                            netNotifyTask,
-                            quickInfoTask);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogWarn(LogEvents.NetErr, e);
-                    }
-                }
-                else
-                {
-                    await quickInfoTask;
-                }
+                //var content = new ClipboardItemControl { ContentSource = viewModel };
+                //Task quickInfoTask = _quickInfoWindow.ShowContentAsync(
+                //    content,
+                //    TimeSpan.FromSeconds(2));
             }
             catch (Exception e)
             {
@@ -576,173 +461,6 @@ namespace MultiClip
             _dropShadow.Hide();
         }
 
-        private void SetCurrentView(ViewVariant viewVariant)
-        {
-            if (_currentViewVariant != viewVariant)
-            {
-                _currentViewVariant = viewVariant;
-                if (viewVariant == ViewVariant.LocalClipboard)
-                {
-                    LocalView.Visibility = Visibility.Visible;
-                    LocalList.ItemsSource = _viewModel.LocalClipboards;
-                    RemoteView.Visibility = Visibility.Collapsed;
-                    RemoteList.ItemsSource = null;
-                }
-                else if (viewVariant == ViewVariant.RemoteClipboard)
-                {
-                    LocalView.Visibility = Visibility.Collapsed;
-                    LocalList.ItemsSource = null;
-                    RemoteView.Visibility = Visibility.Visible;
-                    RemoteList.ItemsSource = _viewModel.RemoteClipboards;
-                    RemoteHostList.ItemsSource = _viewModel.RemoteHosts;
-                }
-                else
-                {
-                    throw new InvalidProgramException("Unknown value for type " + nameof(ViewVariant));
-                }
-            }
-        }
-
-        private async void OnRemoteHostsChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            try
-            {
-                if (e.Action == NotifyCollectionChangedAction.Add)
-                {
-                    var remoteStates = AppState.Current.RemoteClipboardStates;
-                    IEnumerable<Host> newHosts = e.NewItems.Cast<Host>();
-
-                    var enabledMachineGuids = AppState.Current.UserSettings.EnabledMachineGuids;
-                    foreach (var host in newHosts)
-                    {
-                        var remoteState = new RemoteClipboardState
-                        {
-                            Identity = host,
-                            States = new ObservableCollection<ClipboardState>(),
-                        };
-                        remoteState.States.CollectionChanged += (s, args) => OnHostStatesChanged(s, args, remoteState.Identity);
-                        remoteStates.Add(remoteState);
-                        var viewModel = new RemoteHostViewModel
-                        {
-                            MachineGuid = remoteState.Identity.MachineGuid,
-                            DisplayName = remoteState.Identity.MachineName,
-                            IsEnabled = enabledMachineGuids.Contains(remoteState.Identity.MachineGuid),
-                        };
-                        viewModel.PropertyChanged += OnRemoteHostPropertyChanged;
-                        _viewModel.RemoteHosts.Add(viewModel);
-                    }
-
-                    await UpdateNetworkStatesAsync();
-                }
-                else if (e.Action == NotifyCollectionChangedAction.Remove)
-                {
-                    var remoteStates = AppState.Current.RemoteClipboardStates;
-                    IEnumerable<Host> removedHosts = e.OldItems.Cast<Host>();
-
-                    var enabledMachineGuids = AppState.Current.UserSettings.EnabledMachineGuids;
-                    foreach (var host in removedHosts)
-                    {
-                        remoteStates.Remove(remoteStates.FirstOrDefault(x => x.Identity.MachineGuid == host.MachineGuid));
-                        _viewModel.RemoteHosts.Remove(_viewModel.RemoteHosts.FirstOrDefault(x => x.MachineGuid == host.MachineGuid));
-                    }
-
-                    await UpdateNetworkStatesAsync();
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarn(LogEvents.NetErr, ex);
-            }
-        }
-
-        private async Task UpdateNetworkStatesAsync()
-        {
-            var remoteHosts = AppState.Current.RemoteClipboardStates;
-            var enabledMachineGuids = AppState.Current.UserSettings.EnabledMachineGuids;
-            var enabledHosts = remoteHosts.Where(x => enabledMachineGuids.Contains(x.Identity.MachineGuid));
-            foreach (var remoteHost in enabledHosts)
-            {
-                // Get the list of currently known state IDs.
-                List<Guid> knownStateIds = remoteHost.States.Select(x => x.Id).ToList();
-                // Send a request to get any new IDs.
-                ClipboardInfoResponse cbInfo = await remoteHost.Identity.SendAsync(new ClipboardInfoRequest(knownStateIds));
-                // Get the value of every state that is not known.
-                // and add it to the list.
-                foreach (var state in cbInfo.States
-                    .Where(x => !knownStateIds.Contains(x.Id))
-                    .OrderBy(x => x.DateTime))
-                {
-                    ClipboardStateResponse res = await remoteHost.Identity.SendAsync(new ClipboardStateRequest(state.Id));
-
-                    if (res.IsError)
-                    {
-                        res.Buffer = null;
-                        _logger.LogWarn(LogEvents.NetErr, res);
-                        continue;
-                    }
-                    else
-                    {
-                        remoteHost.States.Add(new ClipboardState(res.StateGuid, res.DateTime, new ClipboardItem[]
-                        {
-                            ClipboardItem.FromBuffer(res.Format, res.Buffer, cloneBuffer: false)
-                        }));
-                    }
-                }
-            }
-        }
-
-        private async void OnRemoteHostPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            var viewModel = (RemoteHostViewModel)sender;
-            if (e.PropertyName == nameof(RemoteHostViewModel.IsEnabled))
-            {
-                var enabledMachineIds = AppState.Current.UserSettings.EnabledMachineGuids;
-                if (viewModel.IsEnabled)
-                {
-                    var remoteHost = AppState.Current.RemoteClipboardStates.First(x => x.Identity.MachineGuid == viewModel.MachineGuid);
-                    remoteHost.States.Clear();
-                    enabledMachineIds.Add(viewModel.MachineGuid);
-                    UpdateNetworkStatesAsync().GetAwaiter();
-                }
-                else
-                {
-                    foreach (var stateViewModel in _viewModel.RemoteClipboards.Where(x => x.Host.MachineGuid == viewModel.MachineGuid).ToList())
-                    {
-                        _viewModel.RemoteClipboards.Remove(stateViewModel);
-                    }
-                    enabledMachineIds.Remove(viewModel.MachineGuid);
-                }
-
-                try
-                {
-                    await AppState.Current.UserSettings.SaveToDiskAsync();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarn(LogEvents.DiskErr, ex);
-                }
-            }
-        }
-
-        private void OnHostStatesChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e, Host host)
-        {
-            Dispatcher.InvokeAsync(() =>
-            {
-                if (e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add)
-                {
-                    foreach (var item in e.NewItems.Cast<ClipboardState>())
-                    {
-                        var viewModel = CreateClipboardViewModel(item, host);
-                        _viewModel.RemoteClipboards.Insert(0, viewModel);
-                    }
-                }
-            });
-        }
-
         private UIElement GetStartNotificationContent()
         {
             StackPanel panel = new StackPanel
@@ -769,9 +487,9 @@ namespace MultiClip
             return panel;
         }
 
-        private static readonly Regex MultipleWhitespaceRegex = new Regex("\\s{2,}", RegexOptions.None);
+        private static readonly Regex WhitespaceRegex = new Regex("[^\\S\\r\\n]", RegexOptions.None);
 
-        private ClipboardViewModel CreateClipboardViewModel(ClipboardState state, Host optionalHost)
+        private ClipboardViewModel CreateClipboardViewModel(ClipboardState state)
         {
             ClipboardItem item = ClipboardParser.GetPreferredItem(state.Items, serializable: false);
             if (item == null)
@@ -780,7 +498,6 @@ namespace MultiClip
                 return new UnknownViewModel(
                     state,
                     DateTime.Now,
-                    optionalHost,
                     onPaste: OnPasteStateClicked,
                     onDelete: OnDeleteStateClicked);
             }
@@ -791,7 +508,6 @@ namespace MultiClip
                     return new ImageViewModel(
                         state,
                         DateTime.Now,
-                        optionalHost,
                         onPaste: OnPasteStateClicked,
                         onDelete: OnDeleteStateClicked)
                     {
@@ -808,7 +524,6 @@ namespace MultiClip
                         return new ColorViewModel(
                             state,
                             DateTime.Now,
-                            optionalHost,
                             onPaste: OnPasteStateClicked,
                             onDelete: OnDeleteStateClicked)
                         {
@@ -819,11 +534,10 @@ namespace MultiClip
                     }
                     else
                     {
-                        string textContent = MultipleWhitespaceRegex.Replace(ClipboardParser.ParseText(item), " ");
+                        string textContent = PostProcessText(ClipboardParser.ParseText(item));
                         return new TextViewModel(
                             state,
                             DateTime.Now,
-                            optionalHost,
                             onPaste: OnPasteStateClicked,
                             onDelete: OnDeleteStateClicked)
                         {
@@ -837,7 +551,6 @@ namespace MultiClip
                     return new FileDropViewModel(
                         state,
                         DateTime.Now,
-                        optionalHost,
                         onPaste: OnPasteStateClicked,
                         onDelete: OnDeleteStateClicked)
                     {
@@ -848,10 +561,34 @@ namespace MultiClip
                     return new UnknownViewModel(
                         state,
                         DateTime.Now,
-                        optionalHost,
                         onPaste: OnPasteStateClicked,
                         onDelete: OnDeleteStateClicked);
             }
+        }
+
+        private string PostProcessText(string text)
+        {
+            text = WhitespaceRegex.Replace(text.Replace("\t", "  "), " ");
+            string[] lines = text.Split('\n');
+            int ws = lines.Min(CountLeadingWhitespace);
+            return string.Join("\n", lines.Select(line => line.Substring(ws)).ToArray());
+        }
+
+        private int CountLeadingWhitespace(string text)
+        {
+            int count = 0;
+            foreach (char ch in text)
+            {
+                if (ch == ' ')
+                {
+                    count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return count;
         }
 
         private async void OnPasteStateClicked(ClipboardViewModel viewModel)
@@ -873,9 +610,9 @@ namespace MultiClip
 
         private void MarkCurrentViewModel(ClipboardViewModel optViewModel)
         {
-            foreach (var otherViewModel in _viewModel.LocalClipboards.Concat(_viewModel.RemoteClipboards))
+            foreach (var item in _viewModel.ClipboardItems)
             {
-                otherViewModel.IsCurrent = false;
+                item.IsCurrent = false;
             }
             if (optViewModel != null)
             {
@@ -885,17 +622,9 @@ namespace MultiClip
 
         private void OnDeleteStateClicked(ClipboardViewModel viewModel)
         {
-            if (_viewModel.LocalClipboards.Remove(viewModel))
+            if (_viewModel.ClipboardItems.Remove(viewModel))
             {
-                AppState.Current.LocalStates.Remove(viewModel.State);
-            }
-            else
-            {
-                _viewModel.RemoteClipboards.Remove(viewModel);
-                foreach (var host in AppState.Current.RemoteClipboardStates)
-                {
-                    host.States.Remove(viewModel.State);
-                }
+                AppState.Current.ClipboardStates.Remove(viewModel.State);
             }
         }
 
