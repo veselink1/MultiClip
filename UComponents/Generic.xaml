@@ -30,7 +30,7 @@
     <!-- Font Sizes -->
     <sys:Double x:Key="UFontSizeSmall">12</sys:Double>
     <sys:Double x:Key="UFontSizeMedium">15</sys:Double>
-    <sys:Double x:Key="UFontSizeLarge">18.14</sys:Double>
+    <sys:Double x:Key="UFontSizeLarge">18</sys:Double>
     <sys:Double x:Key="UFontSizeExtraLarge">25.5</sys:Double>
 
     <!-- Color Brushes -->
